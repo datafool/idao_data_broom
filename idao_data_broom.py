@@ -17,7 +17,6 @@ def read_train_test_data(data_path):
 	print("Creating closest features for test data")
 	test_closest_hits_features = test.swifter.apply(utils.find_closest_hit_per_station, 
 		result_type="expand", axis=1)
-
 	#changing column name to more readable format
 	new_col_names = {i: f'closest_feature_{i}' for i in range(24)}
 	train_closest_hits_features.rename(columns=new_col_names, inplace=True)
@@ -34,7 +33,7 @@ def read_train_test_data(data_path):
 
 def read_private_test_data(data_path):
 	print("Reading private test data")
-	test_private = load_full_private_test_csv(data_path)
+	test_private = utils.load_full_private_test_csv(data_path)
 	print("Creating closest features for private test data")
 	test_closest_hits_features = test_private.swifter.apply(utils.find_closest_hit_per_station, 
 		result_type="expand", axis=1)
@@ -47,7 +46,7 @@ def read_private_test_data(data_path):
 	return test_concat
 
 
-def prepare_date(train):
+def prepare_data(train, features):
 	train_part, validation = train_test_split(train, test_size=0.2, random_state=100)
 	train_weight_min = train_part.loc[train_part['weight'] >0, 'weight'].min()
 	train_part_mod = train_part.copy()
@@ -71,9 +70,9 @@ def train_model_track2(train_pool, validation_pool, validation, features, data_p
                          use_best_model=True,
                          early_stopping_rounds=100,
                          max_depth=7,
-                         max_bin=100)
+                        max_bin=100)
 
-	cat.fit(train_pool, eval_set=valid_pool)
+	cat.fit(train_pool, eval_set=validation_pool)
 
 	valid_pred_prob = cat.predict_proba(validation.loc[:, features].values)[:,1]
 	valid_score_90 = scoring.rejection90(validation.label.values, valid_pred_prob, sample_weight=validation.weight.values)
@@ -96,7 +95,7 @@ def train_model_track1(train_pool, validation_pool, validation, test_private, fe
                          max_bin=100
                          )
 
-	cat.fit(train_pool, eval_set=valid_pool)
+	cat.fit(train_pool, eval_set=validation_pool)
 	valid_pred_prob = cat.predict_proba(validation.loc[:, features].values)[:, 1]
 	valid_score_90 = scoring.rejection90(validation.label.values, valid_pred_prob, sample_weight=validation.weight.values)
 	#0.771923225
@@ -112,11 +111,17 @@ def train_model_track1(train_pool, validation_pool, validation, test_private, fe
 def main(data_path):
 	print("Reading Data")
 	import pdb; pdb.set_trace()
-	train, test_public, features = read_train_test_data(data_path)
+	train = pd.read_csv(os.path.join(data_path, 'train_advance_feature.csv.gz'), index_col=False)
+	test = pd.read_csv(os.path.join(data_path, 'test_advance_feature.csv.gz'), index_col=utils.ID_COLUMN)
+	test_private = pd.read_csv(os.path.join(data_path, 'test_private_v3_track_1.csv.gz'), index_col=utils.ID_COLUMN)
+	#train, test_public, features = read_train_test_data(data_path)
+       
 	print("Reading private test data")
-	test_private = read_private_test_data(data_path)
+	#test_private = read_private_test_data(data_path)
 	print("Preparing data for training model")
-	train_part, validation, train_pool, validation_pool = prepare_date(train)
+	features = utils.SIMPLE_FEATURE_COLUMNS
+	features.extend([f'closest_feature_{i}' for i in range(24)])
+	train_part, validation, train_pool, validation_pool = prepare_data(train, features)
 	print("Training and predicting for track 1")
 	train_model_track1(train_pool, validation_pool, validation, test_private, features, data_path)
 	print("Track 1 completed")
