@@ -20,8 +20,8 @@ def read_train_test_data(data_path):
 
 	#changing column name to more readable format
 	new_col_names = {i: f'closest_feature_{i}' for i in range(24)}
-	train_closest_hits_features.rename(columns={new_col_names}, inplace=True)
-	test_closest_hits_features.rename(columns={new_col_names}, inplace=True)
+	train_closest_hits_features.rename(columns=new_col_names, inplace=True)
+	test_closest_hits_features.rename(columns=new_col_names, inplace=True)
 
 	features = utils.SIMPLE_FEATURE_COLUMNS
 	# extending features list to add closest features 
@@ -41,7 +41,7 @@ def read_private_test_data(data_path):
 
 	#changing column name to more readable format
 	new_col_names = {i: f'closest_feature_{i}' for i in range(24)}
-	test_closest_hits_features.rename(columns={new_col_names}, inplace=True)
+	test_closest_hits_features.rename(columns=new_col_names, inplace=True)
 	test_concat = pd.concat([test_private.loc[:, utils.SIMPLE_FEATURE_COLUMNS], test_closest_hits_features], axis=1)
 
 	return test_concat
