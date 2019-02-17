@@ -10,4 +10,5 @@ Or, they can run individual functions, once train, test_private data are loaded 
 work prepare_data() should be called first to prepare the data in right format.
 
 feature: list: utils.SIMPLE_FEATURE_COLUMNS + closest_features
+folder `best_model` contains saved model for both the tracks
 
