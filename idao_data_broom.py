@@ -3,6 +3,7 @@ import utils
 import pandas as pd
 import numpy as np
 import swifter
+import scoring
 from sklearn.model_selection import train_test_split
 from catboost import CatBoostClassifier, Pool
 
@@ -98,7 +99,7 @@ def train_model_track2(train_pool, validation_pool, validation, features, data_p
     cat.fit(train_pool, eval_set=validation_pool)
 
     valid_pred_prob = cat.predict_proba(validation.loc[:, features].values)[:, 1]
-    valid_score_90 = utils.scoring.rejection90(validation.label.values, valid_pred_prob,
+    valid_score_90 = scoring.rejection90(validation.label.values, valid_pred_prob,
                                          sample_weight=validation.weight.values)
     print(f"Score at rejection 90 for validation {valid_score_90}")
     model_file = os.path.join(data_path, 'track_2_best_model.cbm')
@@ -132,7 +133,7 @@ def train_model_track1(train_pool, validation_pool, validation, test_private, fe
 
     cat.fit(train_pool, eval_set=validation_pool)
     valid_pred_prob = cat.predict_proba(validation.loc[:, features].values)[:, 1]
-    valid_score_90 = utils.scoring.rejection90(validation.label.values, valid_pred_prob,
+    valid_score_90 = scoring.rejection90(validation.label.values, valid_pred_prob,
                                          sample_weight=validation.weight.values)
     # 0.771923225
     print(f"Score at rejection 90 {valid_score_90}")
@@ -170,23 +171,23 @@ def main(data_path):
     # -------------- Start of Block 2 ----------------
     # If train, test and test_private data is already present in csv format, please comment above block and un-comment
     # below block and use it
-    # train_file = 'train_advance_feature.csv.gz'
-    # test_file = 'test_advance_feature'
-    # test_private_file = 'test_private_v3_track_1.csv.gz'
-    # train = pd.read_csv(os.path.join(data_path, train_file), index_col=False)
-    # test = pd.read_csv(os.path.join(data_path, test_file), index_col=utils.ID_COLUMN)
-    # test_private = pd.read_csv(os.path.join(data_path, test_private_file), index_col=utils.ID_COLUMN)
-    # print("Preparing data for training model")
-    # features = utils.SIMPLE_FEATURE_COLUMNS
-    # features.extend([i for i in range(24)])
+    #train_file = 'train_advance_feature.csv.gz'
+    #test_file = 'test_advance_feature.csv.gz'
+    #test_private_file = 'test_private_v3_track_1.csv.gz'
+    #train = pd.read_csv(os.path.join(data_path, train_file), index_col=False)
+    #test = pd.read_csv(os.path.join(data_path, test_file), index_col=utils.ID_COLUMN)
+    #test_private = pd.read_csv(os.path.join(data_path, test_private_file), index_col=utils.ID_COLUMN)
+    #print("Preparing data for training model")
+    #features = utils.SIMPLE_FEATURE_COLUMNS
+    #features.extend([i for i in range(24)])
 
-    # train_part, validation, train_pool, validation_pool = prepare_data(train, features)
-    # print("Training and predicting for track 1")
-    # train_model_track1(train_pool, validation_pool, validation, test_private, features, data_path)
-    # print("Track 1 completed")
-    # print("Training and saving model for track 2")
-    # train_model_track2(train_pool, validation_pool, validation, features, data_path)
-    # print("Completed successfully")
+    #train_part, validation, train_pool, validation_pool = prepare_data(train, features)
+    #print("Training and predicting for track 1")
+    #train_model_track1(train_pool, validation_pool, validation, test_private, features, data_path)
+    #print("Track 1 completed")
+    #print("Training and saving model for track 2")
+    #train_model_track2(train_pool, validation_pool, validation, features, data_path)
+    #print("Completed successfully")
     # -------------- End of Block 2 -----------------
 
 
